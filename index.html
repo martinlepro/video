@@ -386,7 +386,7 @@
        ─── RESPONSIVITÉ ──────────────────────────────────────
        ══════════════════════════════════════════════════════════ */
 
-    /* Tablette */
+    /* ── Tablette ── */
     @media (max-width: 860px) {
       #main { padding: 14px; }
       #grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
@@ -396,69 +396,158 @@
       .ctrl-select { max-width: 52px; }
     }
 
-    /* Mobile */
+    /* ── Mobile portrait (≤ 600px) ── */
     @media (max-width: 600px) {
       :root { --header-h: 52px; --tabs-h: 42px; }
 
       #header { padding: 0 12px; gap: 8px; }
-      .logo { font-size: 17px; }
+      .logo   { font-size: 17px; }
       #search-mode-btn { font-size: 10px; padding: 0 8px; }
-      #search { font-size: 13px; }
+      #search          { font-size: 13px; }
 
-      /* Modal plein écran sur mobile */
-      #modal-bg { padding: 0; align-items: flex-end; }
-      #modal-bg.open { background: #000; }
-
+      /* Le modal monte depuis le bas */
+      #modal-bg       { padding: 0; align-items: flex-end; background: rgba(0,0,0,.88); }
+      #modal-bg.open  { background: #000; }
       #player-wrap {
         border-radius: 14px 14px 0 0;
         border-bottom: none;
-        max-height: 92vh;
-        overflow: hidden;
+        max-height: 88svh;
+        width: 100%;
+      }
+      @keyframes slideUp {
+        from { opacity:0; transform:translateY(40px); }
+        to   { opacity:1; transform:translateY(0); }
       }
 
       #player-header { padding: 9px 11px; }
       #player-title  { font-size: 12px; }
 
-      /* Contrôles compacts sur mobile */
-      #custom-controls { padding: 8px 9px; }
+      /* ── Contrôles compacts : une seule ligne, zéro scroll ── */
+      #custom-controls  { padding: 7px 8px; }
+      #progress-wrap    { height: 5px; margin-bottom: 9px; }
+      #controls-row     { gap: 2px; flex-wrap: nowrap; overflow: hidden; }
 
-      #controls-row { gap: 3px; }
-
-      /* Masquer les éléments secondaires sur petit écran */
+      /* Masqués sur mobile portrait */
       #quality-select,
+      #pip-btn,
+      #theater-ctrl-btn,
+      #dl-btn,
       .ctrl-sep,
       #skip-back span,
-      #skip-fwd  span { display: none; }
+      #skip-fwd  span { display: none !important; }
 
-      #volume-slider { width: 40px; }
-      .ctrl-btn { min-width: 28px; height: 28px; }
-      .ctrl-btn.primary { min-width: 34px; height: 34px; }
+      /* Taille boutons */
+      .ctrl-btn         { min-width: 26px; height: 26px; padding: 0 3px; }
+      .ctrl-btn.primary { min-width: 32px; height: 32px; }
+      .ctrl-btn svg     { width: 13px; height: 13px; }
 
-      #time-display { font-size: 10px; }
-      #speed-select { max-width: 46px; font-size: 10px; }
+      /* Volume + time + speed */
+      #volume-slider { width: 34px; }
+      #time-display  { font-size: 9px; letter-spacing: -.3px; }
+      #speed-select  { max-width: 42px; font-size: 10px; height: 26px; padding: 0 3px; }
 
-      /* Barre de progression plus haute = plus facile à toucher */
-      #progress-wrap { height: 6px; margin-bottom: 12px; }
-      #progress-wrap:hover { height: 8px; margin-bottom: 10px; }
+      /* Progression tactile plus haute */
+      #progress-wrap       { height: 6px; }
+      #progress-thumb      { width: 14px; height: 14px; }
 
-      #grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
-      #main { padding: 10px; }
+      #grid  { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+      #main  { padding: 10px; }
     }
 
-    /* Très petit (< 400px) */
+    /* ── Très petit (< 400px) ── */
     @media (max-width: 400px) {
-      #grid { grid-template-columns: repeat(2, 1fr); }
+      #grid       { grid-template-columns: repeat(2, 1fr); }
       #search-wrap { max-width: none; }
       #theater-hdr-btn { display: none; }
+      #volume-wrap { display: none; } /* sacrifice le volume sur écran minuscule */
     }
 
-    /* Paysage mobile */
-    @media (max-height: 450px) and (orientation: landscape) {
-      #player-wrap { max-height: 100vh; }
-      #video-container { aspect-ratio: unset; flex: 1; max-height: 65vh; }
-      #player-header { padding: 7px 12px; }
-      #custom-controls { padding: 6px 10px; }
-      #progress-wrap { margin-bottom: 6px; }
+    /* ══════════════════════════════════════════════════════════
+       ─── MODE PAYSAGE MOBILE ────────────────────────────────
+       Les contrôles sont en overlay fixe AU BAS de la vidéo.
+       Zéro scroll horizontal. Vidéo plein écran.
+       ══════════════════════════════════════════════════════════ */
+    @media (max-height: 500px) and (orientation: landscape) {
+
+      /* Modal = plein écran noir */
+      #modal-bg      { padding: 0; background: #000; align-items: center; }
+      #modal-bg.open { background: #000; }
+
+      /* Player occupe tout l'écran */
+      #player-wrap {
+        max-width: 100%;
+        height: 100svh;
+        border-radius: 0;
+        border: none;
+        background: #000;
+        position: relative;       /* contexte pour les overlays */
+        overflow: hidden;
+      }
+
+      /* Vidéo : plein écran absolu */
+      #video-container {
+        position: absolute;
+        inset: 0;
+        aspect-ratio: unset;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Header : overlay en haut avec fondu */
+      #player-header {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        z-index: 10;
+        background: linear-gradient(rgba(0,0,0,.75) 0%, transparent 100%);
+        border-bottom: none;
+        padding: 8px 14px;
+        transition: opacity .3s;
+      }
+
+      /* Contrôles : overlay EN BAS avec fondu */
+      #custom-controls {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        z-index: 10;
+        background: linear-gradient(transparent 0%, rgba(0,0,0,.88) 100%);
+        padding: 22px 12px 8px;
+        transition: opacity .3s;
+      }
+
+      /* Barre de progression */
+      #progress-wrap  { height: 4px; margin-bottom: 7px; }
+      #progress-wrap:hover { height: 6px; margin-bottom: 5px; }
+
+      /* Une seule ligne de contrôles, pas de scroll */
+      #controls-row   { gap: 4px; flex-wrap: nowrap; overflow: hidden; }
+
+      /* Masqués en paysage pour tenir sur une ligne */
+      #quality-select,
+      #pip-btn,
+      #theater-ctrl-btn,
+      .ctrl-sep,
+      #skip-back span,
+      #skip-fwd  span { display: none !important; }
+
+      /* Boutons légèrement plus petits */
+      .ctrl-btn         { min-width: 28px; height: 28px; padding: 0 4px; }
+      .ctrl-btn.primary { min-width: 34px; height: 34px; }
+      .ctrl-btn svg     { width: 13px; height: 13px; }
+
+      #volume-slider { width: 50px; }
+      #time-display  { font-size: 10px; }
+      #speed-select  { max-width: 46px; font-size: 10px; height: 27px; }
+
+      /* Télécharger visible en paysage (plus de place) */
+      #dl-btn { display: flex !important; }
+
+      /* Auto-masquage identique au fullscreen */
+      #player-wrap.hide-ui #player-header,
+      #player-wrap.hide-ui #custom-controls {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #player-wrap.hide-ui { cursor: none; }
     }
   </style>
 </head>
@@ -923,6 +1012,8 @@ function openPlayer(v) {
   }
 
   video.play().catch(() => {});
+  // En paysage, masquer les contrôles après 3s dès l'ouverture
+  setTimeout(checkAndStartAutoHide, 300);
 }
 
 function closePlayer() {
@@ -1090,22 +1181,22 @@ $('fs-btn').addEventListener('click', toggleFullscreen);
 // Mise à jour de l'icône fullscreen + auto-masquage des contrôles
 function onFullscreenChange() {
   const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
-  $('fs-icon-enter').style.display = isFs ? 'none'  : '';
-  $('fs-icon-exit').style.display  = isFs ? ''      : 'none';
+  $('fs-icon-enter').style.display = isFs ? 'none' : '';
+  $('fs-icon-exit').style.display  = isFs ? ''     : 'none';
   $('fs-btn').classList.toggle('fs-active', isFs);
-
-  if (isFs) {
-    startAutoHide();
-  } else {
-    stopAutoHide();
-    playerWrap.classList.remove('hide-ui');
-  }
+  if (isFs) startAutoHide();
+  else      stopAutoHide();
 }
 document.addEventListener('fullscreenchange',       onFullscreenChange);
 document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 
-// Auto-masquage des contrôles après 3 s d'inactivité en plein écran
+// Auto-masquage : actif en fullscreen ET en paysage mobile
 let hideTimer = null;
+
+function isOverlayMode() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement)
+      || (window.innerHeight <= 500 && window.innerWidth > window.innerHeight);
+}
 function startAutoHide() {
   clearTimeout(hideTimer);
   playerWrap.classList.remove('hide-ui');
@@ -1114,14 +1205,18 @@ function startAutoHide() {
 function stopAutoHide() {
   clearTimeout(hideTimer);
   hideTimer = null;
+  playerWrap.classList.remove('hide-ui');
 }
-// Réactiver les contrôles dès qu'on bouge la souris / touche l'écran
-playerWrap.addEventListener('mousemove', () => {
-  if (document.fullscreenElement || document.webkitFullscreenElement) startAutoHide();
-});
-playerWrap.addEventListener('touchstart', () => {
-  if (document.fullscreenElement || document.webkitFullscreenElement) startAutoHide();
-}, { passive: true });
+function checkAndStartAutoHide() {
+  if (isOverlayMode()) startAutoHide();
+  else stopAutoHide();
+}
+// Réactiver les contrôles dès qu'on bouge souris / touche l'écran
+playerWrap.addEventListener('mousemove', () => { if (isOverlayMode()) startAutoHide(); });
+playerWrap.addEventListener('touchstart', () => { if (isOverlayMode()) startAutoHide(); }, { passive: true });
+// Relancer au changement d'orientation / resize
+window.addEventListener('orientationchange', () => setTimeout(checkAndStartAutoHide, 200));
+window.addEventListener('resize', checkAndStartAutoHide);
 // Double-tap sur la vidéo pour activer/quitter le plein écran (mobile)
 let lastTap = 0;
 $('video-container').addEventListener('touchend', e => {
@@ -1185,4 +1280,4 @@ document.addEventListener('keydown', e => {
 })();
 </script>
 </body>
-</html>
+            </html>
