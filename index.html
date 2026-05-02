@@ -32,7 +32,7 @@
     .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; white-space: nowrap; }
     .logo span { color: var(--accent); }
 
-    /* ─── Search with mode toggle ─── */
+    /* ─── Search ─── */
     #search-wrap { flex: 1; max-width: 500px; display: flex; align-items: center; }
     #search-mode-btn {
       height: 38px; padding: 0 12px; background: var(--accent); color: #000;
@@ -153,6 +153,13 @@
       position: absolute; bottom: 0; left: 0; height: 3px;
       background: var(--accent); z-index: 3;
     }
+    /* Badge "En cours" sur la carte */
+    .card-resume-badge {
+      position: absolute; top: 6px; right: 6px; z-index: 4;
+      background: rgba(232,176,75,.92); color: #000;
+      font-size: 9px; font-weight: 700; letter-spacing: .4px;
+      padding: 2px 6px; border-radius: 8px; text-transform: uppercase;
+    }
     .card-info { padding: 10px 12px; }
     .card-title {
       font-size: 13px; font-weight: 600; white-space: nowrap;
@@ -204,6 +211,7 @@
       width: 100%; max-width: 980px; display: flex; flex-direction: column;
       background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
       overflow: hidden; box-shadow: 0 32px 80px rgba(0,0,0,.8); animation: slideUp .25s ease-out;
+      position: relative;
     }
     #modal-bg.theater #player-wrap { max-width: 100%; border-radius: 0; border: none; height: 100%; }
     @keyframes slideUp {
@@ -214,6 +222,7 @@
     #player-header {
       display: flex; align-items: center; padding: 11px 15px;
       border-bottom: 1px solid var(--border); gap: 10px; flex-shrink: 0;
+      transition: opacity .3s, transform .3s; z-index: 5;
     }
     #player-title {
       font-size: 14px; font-weight: 600; flex: 1;
@@ -250,7 +259,10 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ─── Controls ─── */
-    #custom-controls { background: var(--surface); padding: 10px 13px; flex-shrink: 0; }
+    #custom-controls {
+      background: var(--surface); padding: 10px 13px; flex-shrink: 0;
+      transition: opacity .3s, transform .3s; z-index: 5;
+    }
     #progress-wrap {
       width: 100%; height: 5px; background: var(--surface2); border-radius: 3px;
       cursor: pointer; position: relative; margin-bottom: 10px; transition: height .15s;
@@ -271,6 +283,15 @@
     }
     #progress-wrap:hover #progress-thumb { display: block; }
 
+    /* Tooltip de temps sur la barre de progression */
+    #progress-tooltip {
+      position: absolute; top: -28px; transform: translateX(-50%);
+      background: rgba(0,0,0,.85); color: var(--text); border-radius: 4px;
+      font-family: 'DM Mono', monospace; font-size: 11px; padding: 3px 6px;
+      pointer-events: none; display: none; white-space: nowrap;
+    }
+    #progress-wrap:hover #progress-tooltip { display: block; }
+
     #controls-row { display: flex; align-items: center; gap: 5px; flex-wrap: nowrap; }
     .ctrl-btn {
       height: 32px; min-width: 32px; border-radius: 6px; flex-shrink: 0;
@@ -281,6 +302,7 @@
     .ctrl-btn.primary { background: var(--accent); color: #000; }
     .ctrl-btn.primary:hover { background: var(--accent2); }
     .ctrl-btn.pip-active { color: var(--accent); }
+    .ctrl-btn.fs-active  { color: var(--accent); }
     .ctrl-btn span { font-size: 10px; font-family: 'DM Mono', monospace; line-height: 1; }
 
     #volume-wrap { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
@@ -307,7 +329,64 @@
     }
     .ctrl-select option { background: var(--surface); }
 
-    /* ─── Responsive ─── */
+    /* ══════════════════════════════════════════════════════════
+       ─── PLEIN ÉCRAN ───────────────────────────────────────
+       ══════════════════════════════════════════════════════════ */
+
+    /* Le player-wrap devient le contexte fullscreen */
+    #player-wrap:fullscreen,
+    #player-wrap:-webkit-full-screen {
+      max-width: 100% !important;
+      border-radius: 0 !important;
+      border: none !important;
+      background: #000 !important;
+    }
+
+    /* En fullscreen, le video-container occupe tout l'espace */
+    #player-wrap:fullscreen #video-container,
+    #player-wrap:-webkit-full-screen #video-container {
+      aspect-ratio: unset !important;
+      flex: 1;
+    }
+
+    /* Header et contrôles en overlay absolu */
+    #player-wrap:fullscreen #player-header,
+    #player-wrap:-webkit-full-screen #player-header {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      background: linear-gradient(rgba(0,0,0,.75), transparent);
+      border-bottom: none;
+      padding: 14px 18px;
+    }
+
+    #player-wrap:fullscreen #custom-controls,
+    #player-wrap:-webkit-full-screen #custom-controls {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,.85));
+      padding-top: 36px;
+    }
+
+    /* Auto-masquage des contrôles en fullscreen */
+    #player-wrap:fullscreen.hide-ui #player-header,
+    #player-wrap:fullscreen.hide-ui #custom-controls,
+    #player-wrap:-webkit-full-screen.hide-ui #player-header,
+    #player-wrap:-webkit-full-screen.hide-ui #custom-controls {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Curseur invisible quand les contrôles sont masqués */
+    #player-wrap:fullscreen.hide-ui,
+    #player-wrap:-webkit-full-screen.hide-ui {
+      cursor: none;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       ─── RESPONSIVITÉ ──────────────────────────────────────
+       ══════════════════════════════════════════════════════════ */
+
+    /* Tablette */
     @media (max-width: 860px) {
       #main { padding: 14px; }
       #grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
@@ -315,6 +394,71 @@
       #status-label { display: none; }
       #volume-slider { width: 48px; }
       .ctrl-select { max-width: 52px; }
+    }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+      :root { --header-h: 52px; --tabs-h: 42px; }
+
+      #header { padding: 0 12px; gap: 8px; }
+      .logo { font-size: 17px; }
+      #search-mode-btn { font-size: 10px; padding: 0 8px; }
+      #search { font-size: 13px; }
+
+      /* Modal plein écran sur mobile */
+      #modal-bg { padding: 0; align-items: flex-end; }
+      #modal-bg.open { background: #000; }
+
+      #player-wrap {
+        border-radius: 14px 14px 0 0;
+        border-bottom: none;
+        max-height: 92vh;
+        overflow: hidden;
+      }
+
+      #player-header { padding: 9px 11px; }
+      #player-title  { font-size: 12px; }
+
+      /* Contrôles compacts sur mobile */
+      #custom-controls { padding: 8px 9px; }
+
+      #controls-row { gap: 3px; }
+
+      /* Masquer les éléments secondaires sur petit écran */
+      #quality-select,
+      .ctrl-sep,
+      #skip-back span,
+      #skip-fwd  span { display: none; }
+
+      #volume-slider { width: 40px; }
+      .ctrl-btn { min-width: 28px; height: 28px; }
+      .ctrl-btn.primary { min-width: 34px; height: 34px; }
+
+      #time-display { font-size: 10px; }
+      #speed-select { max-width: 46px; font-size: 10px; }
+
+      /* Barre de progression plus haute = plus facile à toucher */
+      #progress-wrap { height: 6px; margin-bottom: 12px; }
+      #progress-wrap:hover { height: 8px; margin-bottom: 10px; }
+
+      #grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+      #main { padding: 10px; }
+    }
+
+    /* Très petit (< 400px) */
+    @media (max-width: 400px) {
+      #grid { grid-template-columns: repeat(2, 1fr); }
+      #search-wrap { max-width: none; }
+      #theater-hdr-btn { display: none; }
+    }
+
+    /* Paysage mobile */
+    @media (max-height: 450px) and (orientation: landscape) {
+      #player-wrap { max-height: 100vh; }
+      #video-container { aspect-ratio: unset; flex: 1; max-height: 65vh; }
+      #player-header { padding: 7px 12px; }
+      #custom-controls { padding: 6px 10px; }
+      #progress-wrap { margin-bottom: 6px; }
     }
   </style>
 </head>
@@ -391,6 +535,7 @@
         <div id="progress-buffer"></div>
         <div id="progress-bar"></div>
         <div id="progress-thumb"></div>
+        <div id="progress-tooltip">0:00</div>
       </div>
 
       <div id="controls-row">
@@ -472,8 +617,13 @@
 
         <!-- Fullscreen -->
         <button class="ctrl-btn" id="fs-btn" title="Plein écran (F)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <!-- icône "entrer" -->
+          <svg id="fs-icon-enter" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+          <!-- icône "quitter" (masquée par défaut) -->
+          <svg id="fs-icon-exit" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
           </svg>
         </button>
 
@@ -493,7 +643,7 @@
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 const API_BASE = 'https://server-video-regarder.onrender.com';
-const WAKE_INTERVAL_MS = 14 * 60 * 1000; // 14 min — Render sleeps after 15 min
+const WAKE_INTERVAL_MS = 14 * 60 * 1000;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -522,14 +672,14 @@ function toast(msg, type = 'info', ms = 3000) {
 }
 
 // ─── State ────────────────────────────────────────────────────────────────────
-let allVideos   = [];
-let channels    = [];
-let currentChannel = null;   // null = all
+let allVideos      = [];
+let channels       = [];
+let currentChannel = null;
 let currentVideo   = null;
-let searchQuery = '';
-let searchMode  = 'videos';  // 'videos' | 'channels'
-let sortMode    = 'recent';  // 'recent' | 'name' | 'size'
-let theaterMode = false;
+let searchQuery    = '';
+let searchMode     = 'videos';
+let sortMode       = 'recent';
+let theaterMode    = false;
 
 // ─── Auto-wake Render ─────────────────────────────────────────────────────────
 async function wakeServer() {
@@ -537,15 +687,11 @@ async function wakeServer() {
   const label = $('status-label');
   dot.className = 'waking';
   label.textContent = 'Réveil…';
-
   let attempts = 0;
   const MAX = 12;
-
   const tryPing = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/health`, {
-        signal: AbortSignal.timeout(8000)
-      });
+      const res = await fetch(`${API_BASE}/api/health`, { signal: AbortSignal.timeout(8000) });
       if (res.ok) {
         dot.className = 'online';
         label.textContent = 'En ligne';
@@ -553,7 +699,6 @@ async function wakeServer() {
         return true;
       }
     } catch (_) {}
-
     attempts++;
     if (attempts < MAX) {
       label.textContent = `Réveil… (${attempts}/${MAX})`;
@@ -565,11 +710,8 @@ async function wakeServer() {
     }
     return false;
   };
-
   return tryPing();
 }
-
-// Keep Render awake every 14 min
 setInterval(() => fetch(`${API_BASE}/api/health`).catch(() => {}), WAKE_INTERVAL_MS);
 
 // ─── API ──────────────────────────────────────────────────────────────────────
@@ -587,7 +729,6 @@ function sortVideos(vids) {
   if (sortMode === 'size')   return v.sort((a, b) => b.size - a.size);
   return v;
 }
-
 document.querySelectorAll('.sort-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
@@ -603,42 +744,23 @@ async function loadChannels() {
   try {
     channels = await api('/api/channels');
     renderTabs();
-  } catch (e) {
-    console.error('loadChannels:', e);
-  }
+  } catch (e) { console.error('loadChannels:', e); }
 }
-
 function renderTabs() {
   const bar = $('tabs-bar');
   bar.innerHTML = '';
-
-  // Total = root channel videoCount (which equals all videos)
   const rootCh = channels.find(c => c.name === 'root');
   const totalCount = rootCh ? rootCh.videoCount : channels.reduce((s,c)=>s+c.videoCount,0);
-
-  // "All" tab
   const allBtn = document.createElement('button');
   allBtn.className = 'tab-btn' + (currentChannel === null ? ' active' : '');
   allBtn.innerHTML = `🎬 Tout <span class="tab-count">${totalCount}</span>`;
-  allBtn.onclick = () => {
-    currentChannel = null;
-    clearSearch();
-    loadVideos();
-    renderTabs();
-  };
+  allBtn.onclick = () => { currentChannel = null; clearSearch(); loadVideos(); renderTabs(); };
   bar.appendChild(allBtn);
-
-  // Per-channel tabs (exclude meta 'root' entry)
   channels.filter(c => c.name !== 'root').forEach(ch => {
     const btn = document.createElement('button');
     btn.className = 'tab-btn' + (currentChannel === ch.name ? ' active' : '');
     btn.innerHTML = `📺 ${esc(ch.name)} <span class="tab-count">${ch.videoCount}</span>`;
-    btn.onclick = () => {
-      currentChannel = ch.name;
-      clearSearch();
-      loadVideos();
-      renderTabs();
-    };
+    btn.onclick = () => { currentChannel = ch.name; clearSearch(); loadVideos(); renderTabs(); };
     bar.appendChild(btn);
   });
 }
@@ -656,7 +778,6 @@ async function loadVideos() {
     $('grid').innerHTML = `<div class="state-box"><div class="icon">⚠️</div><p>Erreur de connexion</p></div>`;
   }
 }
-
 async function searchVideos(q) {
   try {
     const data = await api(`/api/search?q=${encodeURIComponent(q)}`);
@@ -670,7 +791,6 @@ function renderVideos() {
   const grid = $('grid');
   $('total-stat').textContent = `${allVideos.length} vidéo${allVideos.length > 1 ? 's' : ''}`;
   $('section-count').textContent = `· ${allVideos.length}`;
-
   const titleNode = $('section-title').childNodes[0];
   if      (searchQuery)    titleNode.textContent = `Résultats pour "${searchQuery}" `;
   else if (currentChannel) titleNode.textContent = `${currentChannel} `;
@@ -680,14 +800,15 @@ function renderVideos() {
     grid.innerHTML = `<div class="state-box"><div class="icon">📭</div><p>Aucune vidéo trouvée</p></div>`;
     return;
   }
-
   grid.innerHTML = allVideos.map(v => {
     const saved = getProgress(v.path);
     const pct   = saved && v.duration ? Math.round((saved / v.duration) * 100) : 0;
+    const resumeBadge = pct > 1 ? `<div class="card-resume-badge">▶ ${pct}%</div>` : '';
     return `
       <div class="card" data-path="${esc(v.path)}">
         <div class="card-thumb">
           🎞️
+          ${resumeBadge}
           <div class="play-overlay">
             <div class="play-circle">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>
@@ -723,7 +844,6 @@ function saveProgress(path, time, duration) {
     localStorage.setItem(`sv:${path}`, time.toFixed(2));
   }
 }
-
 function getProgress(path) {
   const v = parseFloat(localStorage.getItem(`sv:${path}`));
   return isNaN(v) ? null : v;
@@ -731,22 +851,17 @@ function getProgress(path) {
 
 // ─── Search ───────────────────────────────────────────────────────────────────
 const SEARCH_LABELS = { videos: '🎬 Vidéos', channels: '📺 Chaînes' };
-
 $('search-mode-btn').addEventListener('click', () => {
   searchMode = searchMode === 'videos' ? 'channels' : 'videos';
   $('search-mode-btn').textContent = SEARCH_LABELS[searchMode];
-  $('search').placeholder = searchMode === 'channels'
-    ? 'Rechercher une chaîne…'
-    : 'Rechercher une vidéo…';
+  $('search').placeholder = searchMode === 'channels' ? 'Rechercher une chaîne…' : 'Rechercher une vidéo…';
   if (searchQuery) doSearch(searchQuery);
 });
-
 function clearSearch() {
   $('search').value = '';
   searchQuery = '';
   $('clear-search').classList.remove('visible');
 }
-
 function doSearch(q) {
   if (searchMode === 'channels') {
     const ql = q.toLowerCase();
@@ -763,17 +878,13 @@ function doSearch(q) {
     searchVideos(q);
   }
 }
-
 let searchTimer;
 $('search').addEventListener('input', e => {
   const q = e.target.value.trim();
   searchQuery = q;
   $('clear-search').classList.toggle('visible', q.length > 0);
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    if (q) doSearch(q);
-    else loadVideos();
-  }, 300);
+  searchTimer = setTimeout(() => { if (q) doSearch(q); else loadVideos(); }, 300);
 });
 $('clear-search').addEventListener('click', () => { clearSearch(); loadVideos(); });
 
@@ -792,8 +903,8 @@ const video = $('video');
 
 function openPlayer(v) {
   currentVideo = v;
-  $('player-title').textContent    = v.title;
-  $('player-channel').textContent  = v.channel;
+  $('player-title').textContent   = v.title;
+  $('player-channel').textContent = v.channel;
   video.src = `${API_BASE}/stream/${encodeURI(v.path)}`;
   $('modal-bg').classList.add('open');
   $('video-loading').classList.add('active');
@@ -801,13 +912,12 @@ function openPlayer(v) {
   video.playbackRate = 1;
   video.load();
 
-  // Restore saved position
   const savedTime = getProgress(v.path);
   if (savedTime) {
     const onMeta = () => {
       video.removeEventListener('loadedmetadata', onMeta);
       video.currentTime = savedTime;
-      toast(`Reprise à ${fmtTime(savedTime)}`, 'info', 2000);
+      toast(`▶ Reprise à ${fmtTime(savedTime)}`, 'info', 2500);
     };
     video.addEventListener('loadedmetadata', onMeta);
   }
@@ -819,15 +929,17 @@ function closePlayer() {
   if (currentVideo && video.currentTime > 5) {
     saveProgress(currentVideo.path, video.currentTime, video.duration);
   }
+  // Quitter le plein écran si actif
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+
   $('modal-bg').classList.remove('open');
   if (theaterMode) toggleTheater();
   video.pause();
   video.removeAttribute('src');
   video.load();
   currentVideo = null;
-  renderVideos(); // refresh progress bars on cards
+  renderVideos();
 }
-
 $('close-btn').addEventListener('click', closePlayer);
 $('modal-bg').addEventListener('click', e => { if (e.target.id === 'modal-bg') closePlayer(); });
 
@@ -846,6 +958,7 @@ video.addEventListener('pause', () => updatePlayIcon(false));
 video.addEventListener('ended', () => {
   if (currentVideo) localStorage.removeItem(`sv:${currentVideo.path}`);
   updatePlayIcon(false);
+  renderVideos();
 });
 video.addEventListener('volumechange', updateVolIcon);
 video.addEventListener('error', () => {
@@ -858,22 +971,19 @@ function updateTime() {
   const dur = video.duration   || 0;
   $('time-display').textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
   const pct = dur ? (cur / dur) * 100 : 0;
-  $('progress-bar').style.width   = `${pct}%`;
-  $('progress-thumb').style.left  = `${pct}%`;
+  $('progress-bar').style.width  = `${pct}%`;
+  $('progress-thumb').style.left = `${pct}%`;
 }
-
 function updateBuffer() {
   if (!video.buffered.length || !video.duration) return;
   const end = video.buffered.end(video.buffered.length - 1);
   $('progress-buffer').style.width = `${(end / video.duration) * 100}%`;
 }
-
 function updatePlayIcon(playing) {
   $('play-icon').innerHTML = playing
     ? '<path d="M6 4h4v16H6zm8 0h4v16h-4z"/>'
     : '<path d="M8 5v14l11-7z"/>';
 }
-
 function updateVolIcon() {
   const muted = video.muted || video.volume === 0;
   $('vol-icon').innerHTML = muted
@@ -893,19 +1003,24 @@ function seek(e) {
   const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
   video.currentTime = ratio * video.duration;
 }
+function updateTooltip(e) {
+  if (!video.duration) return;
+  const rect  = $('progress-wrap').getBoundingClientRect();
+  const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const tip   = $('progress-tooltip');
+  tip.textContent  = fmtTime(ratio * video.duration);
+  tip.style.left   = `${ratio * 100}%`;
+}
+$('progress-wrap').addEventListener('mousemove', updateTooltip);
 $('progress-wrap').addEventListener('mousedown', e => { scrubbing = true; seek(e); });
 document.addEventListener('mousemove',  e => { if (scrubbing) seek(e); });
 document.addEventListener('mouseup',    () => { scrubbing = false; });
-// Touch support
-$('progress-wrap').addEventListener('touchstart', e => {
-  scrubbing = true; seek(e.touches[0]);
-}, { passive: true });
+$('progress-wrap').addEventListener('touchstart', e => { scrubbing = true; seek(e.touches[0]); }, { passive: true });
 document.addEventListener('touchmove',  e => { if (scrubbing) seek(e.touches[0]); }, { passive: true });
 document.addEventListener('touchend',   () => { scrubbing = false; });
 
 // ─── Controls ─────────────────────────────────────────────────────────────────
 $('play-btn').addEventListener('click', () => video.paused ? video.play() : video.pause());
-
 $('skip-back').addEventListener('click', () => {
   video.currentTime = Math.max(0, video.currentTime - 10);
   toast('-10s', 'info', 800);
@@ -914,25 +1029,21 @@ $('skip-fwd').addEventListener('click', () => {
   video.currentTime = Math.min(video.duration || Infinity, video.currentTime + 10);
   toast('+10s', 'info', 800);
 });
-
 $('volume-slider').addEventListener('input', e => {
   video.volume = Number(e.target.value);
   video.muted  = video.volume === 0;
 });
 $('mute-btn').addEventListener('click', () => { video.muted = !video.muted; });
-
 $('speed-select').addEventListener('change', e => {
   video.playbackRate = Number(e.target.value);
   toast(`Vitesse : ${e.target.value}×`, 'info', 1500);
 });
-
-// Quality selector — cosmetic (Mega streams the original file, no server-side transcoding)
 $('quality-select').addEventListener('change', e => {
   const q = e.target.value;
-  toast(`Qualité : ${q === 'auto' ? 'Auto' : q + 'p'} (qualité source originale)`, 'info', 2500);
+  toast(`Qualité : ${q === 'auto' ? 'Auto' : q + 'p'} (source originale)`, 'info', 2500);
 });
 
-// Picture-in-Picture
+// PiP
 $('pip-btn').addEventListener('click', async () => {
   try {
     if (document.pictureInPictureElement) {
@@ -943,17 +1054,9 @@ $('pip-btn').addEventListener('click', async () => {
       $('pip-btn').classList.add('pip-active');
       toast('Mode PiP activé', 'success', 2000);
     }
-  } catch (_) {
-    toast('PiP non supporté ou désactivé', 'warn');
-  }
+  } catch (_) { toast('PiP non supporté ou désactivé', 'warn'); }
 });
 video.addEventListener('leavepictureinpicture', () => $('pip-btn').classList.remove('pip-active'));
-
-// Fullscreen
-$('fs-btn').addEventListener('click', () => {
-  if (!document.fullscreenElement) $('video-container').requestFullscreen?.();
-  else document.exitFullscreen?.();
-});
 
 // Download
 $('dl-btn').addEventListener('click', () => {
@@ -967,14 +1070,83 @@ $('dl-btn').addEventListener('click', () => {
   toast(`Téléchargement : "${currentVideo.title}"`, 'info', 2000);
 });
 
+// ════════════════════════════════════════════════════════════════
+// ─── PLEIN ÉCRAN ────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+const playerWrap = $('player-wrap');
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    // Entrer en plein écran sur le player entier (avec les contrôles)
+    const req = playerWrap.requestFullscreen || playerWrap.webkitRequestFullscreen;
+    if (req) req.call(playerWrap).catch(() => {});
+  } else {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (exit) exit.call(document).catch(() => {});
+  }
+}
+$('fs-btn').addEventListener('click', toggleFullscreen);
+
+// Mise à jour de l'icône fullscreen + auto-masquage des contrôles
+function onFullscreenChange() {
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  $('fs-icon-enter').style.display = isFs ? 'none'  : '';
+  $('fs-icon-exit').style.display  = isFs ? ''      : 'none';
+  $('fs-btn').classList.toggle('fs-active', isFs);
+
+  if (isFs) {
+    startAutoHide();
+  } else {
+    stopAutoHide();
+    playerWrap.classList.remove('hide-ui');
+  }
+}
+document.addEventListener('fullscreenchange',       onFullscreenChange);
+document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+
+// Auto-masquage des contrôles après 3 s d'inactivité en plein écran
+let hideTimer = null;
+function startAutoHide() {
+  clearTimeout(hideTimer);
+  playerWrap.classList.remove('hide-ui');
+  hideTimer = setTimeout(() => playerWrap.classList.add('hide-ui'), 3000);
+}
+function stopAutoHide() {
+  clearTimeout(hideTimer);
+  hideTimer = null;
+}
+// Réactiver les contrôles dès qu'on bouge la souris / touche l'écran
+playerWrap.addEventListener('mousemove', () => {
+  if (document.fullscreenElement || document.webkitFullscreenElement) startAutoHide();
+});
+playerWrap.addEventListener('touchstart', () => {
+  if (document.fullscreenElement || document.webkitFullscreenElement) startAutoHide();
+}, { passive: true });
+// Double-tap sur la vidéo pour activer/quitter le plein écran (mobile)
+let lastTap = 0;
+$('video-container').addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - lastTap < 300) toggleFullscreen();
+  lastTap = now;
+});
+
 // ─── Keyboard Shortcuts ───────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   if (!$('modal-bg').classList.contains('open')) return;
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
 
   switch (e.key) {
-    case 'Escape':      closePlayer(); break;
-    case ' ':           e.preventDefault(); video.paused ? video.play() : video.pause(); break;
+    case 'Escape':
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document).catch(() => {});
+      } else {
+        closePlayer();
+      }
+      break;
+    case ' ':
+      e.preventDefault();
+      video.paused ? video.play() : video.pause();
+      break;
     case 'ArrowLeft':
     case 'j': case 'J':
       e.preventDefault();
@@ -985,11 +1157,18 @@ document.addEventListener('keydown', e => {
       e.preventDefault();
       video.currentTime = Math.min(video.duration || Infinity, video.currentTime + 10);
       break;
-    case 'm': case 'M': video.muted = !video.muted; break;
-    case 'f': case 'F':
-      if (!document.fullscreenElement) $('video-container').requestFullscreen?.();
-      else document.exitFullscreen?.();
+    case 'ArrowUp':
+      e.preventDefault();
+      video.volume = Math.min(1, video.volume + 0.1);
+      $('volume-slider').value = video.volume;
       break;
+    case 'ArrowDown':
+      e.preventDefault();
+      video.volume = Math.max(0, video.volume - 0.1);
+      $('volume-slider').value = video.volume;
+      break;
+    case 'm': case 'M': video.muted = !video.muted; break;
+    case 'f': case 'F': toggleFullscreen(); break;
     case 't': case 'T': toggleTheater(); break;
     case 'p': case 'P': $('pip-btn').click(); break;
     case 'd': case 'D': $('dl-btn').click(); break;
