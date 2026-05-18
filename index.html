@@ -112,6 +112,12 @@
       background: var(--surface2); padding: 1px 6px; border-radius: 8px; color: var(--muted);
     }
     .tab-btn.active .tab-count { background: rgba(232,176,75,.2); color: var(--accent); }
+    /* Watch time badge in tabs */
+    .tab-watch {
+      font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted);
+      background: var(--surface2); padding: 1px 5px; border-radius: 6px;
+    }
+    .tab-btn.active .tab-watch { color: rgba(232,176,75,.7); background: rgba(232,176,75,.1); }
 
     /* ─── Main ─── */
     #main { flex: 1; overflow-y: auto; padding: 22px 26px; display: flex; flex-direction: column; gap: 18px; }
@@ -120,6 +126,25 @@
     #main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     #section-title { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
     #section-title span { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 8px; }
+
+    /* ─── Channel Header (when filtering by channel) ─── */
+    #channel-header {
+      display: none; border-radius: 10px; overflow: hidden;
+      padding: 18px 22px; align-items: center; gap: 16px;
+      border: 1px solid var(--border);
+    }
+    #channel-header.visible { display: flex; }
+    #channel-header-emoji {
+      font-size: 42px; line-height: 1; flex-shrink: 0;
+      background: rgba(0,0,0,.25); border-radius: 12px;
+      width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;
+    }
+    #channel-header-info { flex: 1; min-width: 0; }
+    #channel-header-name { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    #channel-header-stats {
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      color: rgba(0,0,0,.6); margin-top: 4px; display: flex; gap: 12px; flex-wrap: wrap;
+    }
 
     /* ─── Grid ─── */
     #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
@@ -133,6 +158,11 @@
       width: 100%; aspect-ratio: 16/9; background: var(--surface2);
       display: flex; align-items: center; justify-content: center;
       font-size: 36px; position: relative; overflow: hidden;
+    }
+    /* Channel color band at bottom of thumb */
+    .card-thumb::before {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+      background: var(--ch-color, transparent); z-index: 2; opacity: 0.7;
     }
     .card-thumb::after {
       content: ''; position: absolute; inset: 0;
@@ -153,12 +183,19 @@
       position: absolute; bottom: 0; left: 0; height: 3px;
       background: var(--accent); z-index: 3;
     }
-    /* Badge "En cours" sur la carte */
+    /* Badge "En cours" */
     .card-resume-badge {
       position: absolute; top: 6px; right: 6px; z-index: 4;
       background: rgba(232,176,75,.92); color: #000;
       font-size: 9px; font-weight: 700; letter-spacing: .4px;
       padding: 2px 6px; border-radius: 8px; text-transform: uppercase;
+    }
+    /* Score badge (top left) */
+    .card-score-badge {
+      position: absolute; top: 6px; left: 6px; z-index: 4;
+      background: rgba(0,0,0,.75); color: var(--accent);
+      font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 400;
+      padding: 2px 6px; border-radius: 6px; display: flex; align-items: center; gap: 3px;
     }
     .card-info { padding: 10px 12px; }
     .card-title {
@@ -169,12 +206,24 @@
     .card-channel {
       background: var(--surface2); padding: 2px 7px; border-radius: 10px;
       color: var(--accent); font-size: 10px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .5px;
+      text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; gap: 3px;
     }
     .card-size { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
     .card-ext {
       background: var(--surface2); padding: 2px 5px; border-radius: 4px;
       font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);
+    }
+    /* View count & watch time on cards */
+    .card-stats {
+      display: flex; align-items: center; gap: 5px; margin-top: 4px; flex-wrap: wrap;
+    }
+    .card-views {
+      font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);
+      display: flex; align-items: center; gap: 3px;
+    }
+    .card-watchtime {
+      font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);
+      display: flex; align-items: center; gap: 3px;
     }
     .state-box { grid-column: 1/-1; text-align: center; padding: 80px 20px; color: var(--muted); }
     .state-box .icon { font-size: 56px; margin-bottom: 16px; }
@@ -231,8 +280,19 @@
     #player-channel {
       font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
       color: var(--accent); background: rgba(232,176,75,.1); padding: 3px 8px;
-      border-radius: 10px; flex-shrink: 0;
+      border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; gap: 4px;
     }
+    /* Player stats row */
+    #player-stats {
+      display: flex; align-items: center; gap: 12px; padding: 6px 15px;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+      background: var(--surface2);
+    }
+    .player-stat {
+      font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .player-stat strong { color: var(--text); }
     #close-btn {
       width: 30px; height: 30px; background: var(--surface2); border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
@@ -282,8 +342,6 @@
       transform: translate(-50%, -50%); display: none; pointer-events: none;
     }
     #progress-wrap:hover #progress-thumb { display: block; }
-
-    /* Tooltip de temps sur la barre de progression */
     #progress-tooltip {
       position: absolute; top: -28px; transform: translateX(-50%);
       background: rgba(0,0,0,.85); color: var(--text); border-radius: 4px;
@@ -329,64 +387,45 @@
     }
     .ctrl-select option { background: var(--surface); }
 
-    /* ══════════════════════════════════════════════════════════
-       ─── PLEIN ÉCRAN ───────────────────────────────────────
-       ══════════════════════════════════════════════════════════ */
-
-    /* Le player-wrap devient le contexte fullscreen */
+    /* ─── Fullscreen ─── */
     #player-wrap:fullscreen,
     #player-wrap:-webkit-full-screen {
-      max-width: 100% !important;
-      border-radius: 0 !important;
-      border: none !important;
-      background: #000 !important;
+      max-width: 100% !important; border-radius: 0 !important;
+      border: none !important; background: #000 !important;
     }
-
-    /* En fullscreen, le video-container occupe tout l'espace */
     #player-wrap:fullscreen #video-container,
     #player-wrap:-webkit-full-screen #video-container {
-      aspect-ratio: unset !important;
-      flex: 1;
+      aspect-ratio: unset !important; flex: 1;
     }
-
-    /* Header et contrôles en overlay absolu */
     #player-wrap:fullscreen #player-header,
-    #player-wrap:-webkit-full-screen #player-header {
-      position: absolute;
-      top: 0; left: 0; right: 0;
+    #player-wrap:-webkit-full-screen #player-header,
+    #player-wrap:fullscreen #player-stats,
+    #player-wrap:-webkit-full-screen #player-stats {
+      position: absolute; top: 0; left: 0; right: 0;
       background: linear-gradient(rgba(0,0,0,.75), transparent);
-      border-bottom: none;
-      padding: 14px 18px;
+      border-bottom: none; padding: 14px 18px;
     }
-
+    #player-wrap:fullscreen #player-stats,
+    #player-wrap:-webkit-full-screen #player-stats {
+      top: 48px; background: transparent; padding: 4px 18px;
+    }
     #player-wrap:fullscreen #custom-controls,
     #player-wrap:-webkit-full-screen #custom-controls {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,.85));
-      padding-top: 36px;
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,.85)); padding-top: 36px;
     }
-
-    /* Auto-masquage des contrôles en fullscreen */
     #player-wrap:fullscreen.hide-ui #player-header,
+    #player-wrap:fullscreen.hide-ui #player-stats,
     #player-wrap:fullscreen.hide-ui #custom-controls,
     #player-wrap:-webkit-full-screen.hide-ui #player-header,
+    #player-wrap:-webkit-full-screen.hide-ui #player-stats,
     #player-wrap:-webkit-full-screen.hide-ui #custom-controls {
-      opacity: 0;
-      pointer-events: none;
+      opacity: 0; pointer-events: none;
     }
-
-    /* Curseur invisible quand les contrôles sont masqués */
     #player-wrap:fullscreen.hide-ui,
-    #player-wrap:-webkit-full-screen.hide-ui {
-      cursor: none;
-    }
+    #player-wrap:-webkit-full-screen.hide-ui { cursor: none; }
 
-    /* ══════════════════════════════════════════════════════════
-       ─── RESPONSIVITÉ ──────────────────────────────────────
-       ══════════════════════════════════════════════════════════ */
-
-    /* ── Tablette ── */
+    /* ─── Responsive ─── */
     @media (max-width: 860px) {
       #main { padding: 14px; }
       #grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
@@ -395,167 +434,91 @@
       #volume-slider { width: 48px; }
       .ctrl-select { max-width: 52px; }
     }
-
-    /* ── Mobile portrait (≤ 600px) ── */
     @media (max-width: 600px) {
       :root { --header-h: 52px; --tabs-h: 42px; }
-
       #header { padding: 0 12px; gap: 8px; }
       .logo   { font-size: 17px; }
       #search-mode-btn { font-size: 10px; padding: 0 8px; }
       #search          { font-size: 13px; }
-
-      /* Modal centré verticalement en portrait */
       #modal-bg       { padding: 12px 0 0; align-items: flex-end; }
       #modal-bg.open  { background: rgba(0,0,0,.95); }
       #player-wrap {
-        border-radius: 16px 16px 0 0;
-        border-bottom: none;
-        max-height: 94svh;
-        width: 100%;
+        border-radius: 16px 16px 0 0; border-bottom: none;
+        max-height: 94svh; width: 100%;
       }
       @keyframes slideUp {
         from { opacity:0; transform:translateY(60px); }
         to   { opacity:1; transform:translateY(0); }
       }
-
       #player-header { padding: 9px 11px; }
       #player-title  { font-size: 12px; }
-
-      /* ── Contrôles compacts : une seule ligne, zéro scroll ── */
+      #player-stats  { padding: 5px 11px; gap: 8px; }
+      .player-stat   { font-size: 10px; }
       #custom-controls  { padding: 7px 8px; }
       #progress-wrap    { height: 5px; margin-bottom: 9px; }
       #controls-row     { gap: 2px; flex-wrap: nowrap; overflow: hidden; }
-
-      /* Masqués sur mobile portrait */
-      #quality-select,
-      #pip-btn,
-      #theater-ctrl-btn,
-      #dl-btn,
-      .ctrl-sep,
-      #skip-back span,
-      #skip-fwd  span { display: none !important; }
-
-      /* Taille boutons */
+      #quality-select, #pip-btn, #theater-ctrl-btn, #dl-btn, .ctrl-sep,
+      #skip-back span, #skip-fwd  span { display: none !important; }
       .ctrl-btn         { min-width: 26px; height: 26px; padding: 0 3px; }
       .ctrl-btn.primary { min-width: 32px; height: 32px; }
       .ctrl-btn svg     { width: 13px; height: 13px; }
-
-      /* Volume + time + speed */
       #volume-slider { width: 34px; }
       #time-display  { font-size: 9px; letter-spacing: -.3px; }
       #speed-select  { max-width: 42px; font-size: 10px; height: 26px; padding: 0 3px; }
-
-      /* Progression tactile plus haute */
       #progress-wrap       { height: 6px; }
       #progress-thumb      { width: 14px; height: 14px; }
-
       #grid  { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
       #main  { padding: 10px; }
+      .card-stats { display: none; } /* compact on mobile */
     }
-
-    /* ── Très petit (< 400px) ── */
     @media (max-width: 400px) {
       #grid       { grid-template-columns: repeat(2, 1fr); }
       #search-wrap { max-width: none; }
       #theater-hdr-btn { display: none; }
-      #volume-wrap { display: none; } /* sacrifice le volume sur écran minuscule */
+      #volume-wrap { display: none; }
     }
-
-    /* ══════════════════════════════════════════════════════════
-       ─── MODE PAYSAGE MOBILE ────────────────────────────────
-       Les contrôles sont en overlay fixe AU BAS de la vidéo.
-       Zéro scroll horizontal. Vidéo plein écran.
-       ══════════════════════════════════════════════════════════ */
     @media (max-height: 500px) and (orientation: landscape) {
-
-      /* Modal = plein écran noir */
       #modal-bg      { padding: 0; background: #000; align-items: center; }
       #modal-bg.open { background: #000; }
-
-      /* Player occupe tout l'écran */
       #player-wrap {
-        max-width: 100%;
-        height: 100svh;
-        border-radius: 0;
-        border: none;
-        background: #000;
-        position: relative;       /* contexte pour les overlays */
-        overflow: hidden;
+        max-width: 100%; height: 100svh; border-radius: 0;
+        border: none; background: #000; position: relative; overflow: hidden;
       }
-
-      /* Vidéo : plein écran absolu */
-      #video-container {
-        position: absolute;
-        inset: 0;
-        aspect-ratio: unset;
-        width: 100%;
-        height: 100%;
-      }
-
-      /* Header : overlay en haut avec fondu */
+      #video-container { position: absolute; inset: 0; aspect-ratio: unset; width: 100%; height: 100%; }
       #player-header {
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        z-index: 10;
+        position: absolute; top: 0; left: 0; right: 0; z-index: 10;
         background: linear-gradient(rgba(0,0,0,.75) 0%, transparent 100%);
-        border-bottom: none;
-        padding: 8px 14px;
-        transition: opacity .3s;
+        border-bottom: none; padding: 8px 14px; transition: opacity .3s;
       }
-
-      /* Contrôles : overlay EN BAS avec fondu */
+      #player-stats {
+        position: absolute; top: 40px; left: 0; right: 0; z-index: 10;
+        background: transparent; border: none; padding: 4px 14px;
+      }
       #custom-controls {
-        position: absolute;
-        bottom: 0; left: 0; right: 0;
-        z-index: 10;
+        position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
         background: linear-gradient(transparent 0%, rgba(0,0,0,.88) 100%);
-        padding: 22px 12px 8px;
-        transition: opacity .3s;
+        padding: 22px 12px 8px; transition: opacity .3s;
       }
-
-      /* Barre de progression */
       #progress-wrap  { height: 4px; margin-bottom: 7px; }
       #progress-wrap:hover { height: 6px; margin-bottom: 5px; }
-
-      /* Une seule ligne de contrôles, pas de scroll */
       #controls-row   { gap: 4px; flex-wrap: nowrap; overflow: hidden; }
-
-      /* Masqués en paysage pour tenir sur une ligne */
-      #pip-btn,
-      #theater-ctrl-btn,
-      .ctrl-sep,
-      #skip-back span,
-      #skip-fwd  span { display: none !important; }
-
-      /* Qualité visible en paysage, compacte */
+      #pip-btn, #theater-ctrl-btn, .ctrl-sep, #skip-back span, #skip-fwd span { display: none !important; }
       #quality-select { display: block !important; max-width: 54px; font-size: 10px; height: 27px; padding: 0 3px; }
-
-      /* Boutons légèrement plus petits */
       .ctrl-btn         { min-width: 28px; height: 28px; padding: 0 4px; }
       .ctrl-btn.primary { min-width: 34px; height: 34px; }
       .ctrl-btn svg     { width: 13px; height: 13px; }
-
       #volume-slider { width: 50px; }
       #time-display  { font-size: 10px; }
       #speed-select  { max-width: 46px; font-size: 10px; height: 27px; }
-
-      /* Télécharger visible en paysage (plus de place) */
       #dl-btn { display: flex !important; }
-
-      /* Auto-masquage identique au fullscreen */
-      #player-wrap.hide-ui #player-header,
-      #player-wrap.hide-ui #custom-controls {
-        opacity: 0;
-        pointer-events: none;
-      }
+      #player-wrap.hide-ui #player-header, #player-wrap.hide-ui #player-stats,
+      #player-wrap.hide-ui #custom-controls { opacity: 0; pointer-events: none; }
       #player-wrap.hide-ui { cursor: none; }
     }
   </style>
 </head>
 <body>
 
-<!-- ─── Toasts ─── -->
 <div id="toast-container"></div>
 
 <!-- ─── Header ─── -->
@@ -575,14 +538,15 @@
 
   <div class="header-right">
     <div id="sort-group">
+      <button class="sort-btn" data-sort="score">⭐ Score</button>
       <button class="sort-btn active" data-sort="recent">Récent</button>
       <button class="sort-btn" data-sort="name">Nom</button>
       <button class="sort-btn" data-sort="size">Taille</button>
+      <button class="sort-btn" data-sort="views">Vues</button>
     </div>
     <button id="theater-hdr-btn" title="Mode théâtre (T)">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="2" y="4" width="20" height="16" rx="2"/>
-        <line x1="2" y1="12" x2="22" y2="12"/>
+        <rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="12" x2="22" y2="12"/>
       </svg>
     </button>
     <div id="server-status">
@@ -600,6 +564,15 @@
 
 <!-- ─── Main ─── -->
 <main id="main">
+  <!-- Channel header (visible when filtering by channel) -->
+  <div id="channel-header">
+    <div id="channel-header-emoji">🎬</div>
+    <div id="channel-header-info">
+      <div id="channel-header-name"></div>
+      <div id="channel-header-stats"></div>
+    </div>
+  </div>
+
   <h2 id="section-title">Toutes les vidéos <span id="section-count"></span></h2>
   <div id="grid">
     <div class="state-box"><div class="icon">⏳</div><p>Connexion au serveur…</p></div>
@@ -615,13 +588,20 @@
       <button id="close-btn" title="Fermer (Échap)">×</button>
     </div>
 
+    <!-- Stats row (from Android app) -->
+    <div id="player-stats">
+      <div class="player-stat">👁 <strong id="stat-views">0</strong> vue(s)</div>
+      <div class="player-stat">⏱ <strong id="stat-watchtime">0min</strong> regardées</div>
+      <div class="player-stat">⭐ Score <strong id="stat-score">0</strong></div>
+      <div class="player-stat" id="stat-last-wrap">🕐 <strong id="stat-last">—</strong></div>
+    </div>
+
     <div id="video-container">
       <video id="video" preload="metadata" playsinline></video>
       <div id="video-loading"><div class="spinner"></div>Chargement…</div>
     </div>
 
     <div id="custom-controls">
-      <!-- Progress bar -->
       <div id="progress-wrap">
         <div id="progress-buffer"></div>
         <div id="progress-bar"></div>
@@ -630,30 +610,23 @@
       </div>
 
       <div id="controls-row">
-        <!-- Play/Pause -->
         <button class="ctrl-btn primary" id="play-btn" title="Lecture/Pause (Espace)">
           <svg id="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M8 5v14l11-7z"/>
           </svg>
         </button>
-
-        <!-- Skip -10s -->
         <button class="ctrl-btn" id="skip-back" title="Reculer 10s (J / ←)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
           </svg>
           <span>10</span>
         </button>
-
-        <!-- Skip +10s -->
         <button class="ctrl-btn" id="skip-fwd" title="Avancer 10s (L / →)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
           </svg>
           <span>10</span>
         </button>
-
-        <!-- Volume -->
         <div id="volume-wrap">
           <button class="ctrl-btn" id="mute-btn" title="Muet (M)">
             <svg id="vol-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -663,14 +636,9 @@
           </button>
           <input id="volume-slider" type="range" min="0" max="1" step="0.05" value="1" />
         </div>
-
-        <!-- Time -->
         <div id="time-display">0:00 / 0:00</div>
-
         <div class="divider"></div>
         <div class="ctrl-sep"></div>
-
-        <!-- Speed -->
         <select id="speed-select" class="ctrl-select" title="Vitesse de lecture">
           <option value="0.5">0.5×</option>
           <option value="0.75">0.75×</option>
@@ -679,46 +647,32 @@
           <option value="1.5">1.5×</option>
           <option value="2">2×</option>
         </select>
-
-        <!-- Quality -->
         <select id="quality-select" class="ctrl-select" title="Qualité (indicatif)">
           <option value="auto">Auto</option>
           <option value="1080">1080p</option>
           <option value="720">720p</option>
           <option value="480">480p</option>
         </select>
-
         <div class="ctrl-sep"></div>
-
-        <!-- PiP -->
         <button class="ctrl-btn" id="pip-btn" title="Picture-in-Picture (P)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="2" y="4" width="20" height="16" rx="2"/>
             <rect x="12" y="12" width="8" height="6" rx="1" fill="currentColor" stroke="none"/>
           </svg>
         </button>
-
-        <!-- Theater -->
         <button class="ctrl-btn" id="theater-ctrl-btn" title="Mode théâtre (T)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="4" width="20" height="16" rx="2"/>
-            <line x1="2" y1="12" x2="22" y2="12"/>
+            <rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="12" x2="22" y2="12"/>
           </svg>
         </button>
-
-        <!-- Fullscreen -->
         <button class="ctrl-btn" id="fs-btn" title="Plein écran (F)">
-          <!-- icône "entrer" -->
           <svg id="fs-icon-enter" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
           </svg>
-          <!-- icône "quitter" (masquée par défaut) -->
           <svg id="fs-icon-exit" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
             <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
           </svg>
         </button>
-
-        <!-- Download -->
         <button class="ctrl-btn" id="dl-btn" title="Télécharger (D)">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -745,9 +699,72 @@ const fmtTime = s => {
   const ss = Math.floor(s % 60).toString().padStart(2, '0');
   return h > 0 ? `${h}:${m.toString().padStart(2,'0')}:${ss}` : `${m}:${ss}`;
 };
+const fmtWatchTime = s => {
+  if (!s || s < 60) return `${Math.round(s||0)}s`;
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  return h > 0 ? `${h}h${m.toString().padStart(2,'0')}min` : `${m}min`;
+};
 const esc = str => String(str).replace(/[&<>"']/g, c =>
   ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])
 );
+
+// ─── ChannelIconMapper (port from Android app) ────────────────────────────────
+const CHANNEL_ICONS = {
+  gaming:    { emoji: '🎮', color: '#1a237e' },
+  game:      { emoji: '🎮', color: '#1a237e' },
+  jeu:       { emoji: '🎮', color: '#1a237e' },
+  sport:     { emoji: '⚽', color: '#1b5e20' },
+  foot:      { emoji: ⚽', color: '#1b5e20' },
+  football:  { emoji: '⚽', color: '#1b5e20' },
+  music:     { emoji: '🎵', color: '#880e4f' },
+  musique:   { emoji: '🎵', color: '#880e4f' },
+  film:      { emoji: '🎬', color: '#b71c1c' },
+  cinema:    { emoji: '🎬', color: '#b71c1c' },
+  movie:     { emoji: '🎬', color: '#b71c1c' },
+  serie:     { emoji: '📺', color: '#4a148c' },
+  séries:    { emoji: '📺', color: '#4a148c' },
+  series:    { emoji: '📺', color: '#4a148c' },
+  tuto:      { emoji: '📚', color: '#e65100' },
+  tutoriel:  { emoji: '📚', color: '#e65100' },
+  tutorial:  { emoji: '📚', color: '#e65100' },
+  cours:     { emoji: '📚', color: '#e65100' },
+  travel:    { emoji: '✈️', color: '#006064' },
+  voyage:    { emoji: '✈️', color: '#006064' },
+  cuisine:   { emoji: '🍕', color: '#bf360c' },
+  food:      { emoji: '🍕', color: '#bf360c' },
+  nature:    { emoji: '🌿', color: '#2e7d32' },
+  tech:      { emoji: '💻', color: '#37474f' },
+  coding:    { emoji: '💻', color: '#37474f' },
+  code:      { emoji: '💻', color: '#37474f' },
+  funny:     { emoji: '😂', color: '#f57f17' },
+  humour:    { emoji: '😂', color: '#f57f17' },
+  anime:     { emoji: '🎌', color: '#c62828' },
+  manga:     { emoji: '🎌', color: '#c62828' },
+  vlog:      { emoji: '📹', color: '#5d4037' },
+  news:      { emoji: '📰', color: '#263238' },
+  actu:      { emoji: '📰', color: '#263238' },
+  science:   { emoji: '🔬', color: '#1a237e' },
+  kids:      { emoji: '🧒', color: '#f57f17' },
+  enfants:   { emoji: '🧒', color: '#f57f17' },
+  fitness:   { emoji: '💪', color: '#1b5e20' },
+  art:       { emoji: '🎨', color: '#4a148c' },
+  dessin:    { emoji: '🎨', color: '#4a148c' },
+  divers:    { emoji: '📁', color: '#424242' },
+};
+
+function getChannelIcon(name) {
+  const key = (name || '').toLowerCase();
+  for (const [k, v] of Object.entries(CHANNEL_ICONS)) {
+    if (key.includes(k)) return v;
+  }
+  // Deterministic color from name hash
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) & 0xFFFFFF;
+  const colors = ['#1a237e','#880e4f','#1b5e20','#b71c1c','#4a148c','#e65100','#006064','#bf360c','#37474f','#f57f17'];
+  const color = colors[Math.abs(hash) % colors.length];
+  return { emoji: '📂', color };
+}
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 function toast(msg, type = 'info', ms = 3000) {
@@ -762,6 +779,46 @@ function toast(msg, type = 'info', ms = 3000) {
   }, ms);
 }
 
+// ─── Stats Storage (port of FirebaseRepository logic) ─────────────────────────
+// Key: `sv-stats:<path>` → { viewCount, totalWatchTime, lastWatched, score }
+function getVideoStats(path) {
+  try {
+    const raw = localStorage.getItem(`sv-stats:${path}`);
+    return raw ? JSON.parse(raw) : { viewCount: 0, totalWatchTime: 0, lastWatched: 0, score: 0 };
+  } catch { return { viewCount: 0, totalWatchTime: 0, lastWatched: 0, score: 0 }; }
+}
+function saveVideoStats(path, stats) {
+  try { localStorage.setItem(`sv-stats:${path}`, JSON.stringify(stats)); } catch {}
+}
+
+/**
+ * Record a watch session — port of FirebaseRepository.recordWatch()
+ * Score formula: watchTime*0.6 + viewCount*10*0.2 + recency*100*0.2
+ */
+function recordWatch(path, watchedSeconds) {
+  if (!path || watchedSeconds < 3) return;
+  const stats = getVideoStats(path);
+  stats.viewCount++;
+  stats.totalWatchTime += watchedSeconds;
+  stats.lastWatched = Date.now();
+  // Recency decay: exp(-days/7)
+  const days = 0; // just watched = recency 1.0
+  const recency = 1.0;
+  stats.score = (stats.totalWatchTime * 0.6) + (stats.viewCount * 10 * 0.2) + (recency * 100 * 0.2);
+  saveVideoStats(path, stats);
+}
+
+/**
+ * Recompute score with recency decay — port of FirebaseRepository.recomputeAllScores()
+ */
+function computeScore(path) {
+  const stats = getVideoStats(path);
+  if (!stats.lastWatched) return 0;
+  const days = (Date.now() - stats.lastWatched) / (1000 * 60 * 60 * 24);
+  const recency = Math.exp(-days / 7);
+  return (stats.totalWatchTime * 0.6) + (stats.viewCount * 10 * 0.2) + (recency * 100 * 0.2);
+}
+
 // ─── State ────────────────────────────────────────────────────────────────────
 let allVideos      = [];
 let channels       = [];
@@ -771,6 +828,7 @@ let searchQuery    = '';
 let searchMode     = 'videos';
 let sortMode       = 'recent';
 let theaterMode    = false;
+let watchStartTime = 0;
 
 // ─── Auto-wake Render ─────────────────────────────────────────────────────────
 async function wakeServer() {
@@ -812,14 +870,19 @@ async function api(path) {
   return res.json();
 }
 
-// ─── Sort ─────────────────────────────────────────────────────────────────────
+// ─── Sort (extended with score and views) ─────────────────────────────────────
 function sortVideos(vids) {
   const v = [...vids];
+  if (sortMode === 'score') {
+    return v.sort((a, b) => computeScore(b.path) - computeScore(a.path));
+  }
   if (sortMode === 'recent') return v.sort((a, b) => new Date(b.modified) - new Date(a.modified));
   if (sortMode === 'name')   return v.sort((a, b) => a.title.localeCompare(b.title));
   if (sortMode === 'size')   return v.sort((a, b) => b.size - a.size);
+  if (sortMode === 'views')  return v.sort((a, b) => getVideoStats(b.path).viewCount - getVideoStats(a.path).viewCount);
   return v;
 }
+
 document.querySelectorAll('.sort-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
@@ -837,23 +900,64 @@ async function loadChannels() {
     renderTabs();
   } catch (e) { console.error('loadChannels:', e); }
 }
+
+function getChannelTotalWatch(channelName) {
+  // Sum watch times of all videos in this channel from local stats
+  return allVideos
+    .filter(v => v.channel === channelName || (channelName === null))
+    .reduce((sum, v) => sum + (getVideoStats(v.path).totalWatchTime || 0), 0);
+}
+
 function renderTabs() {
   const bar = $('tabs-bar');
   bar.innerHTML = '';
   const rootCh = channels.find(c => c.name === 'root');
   const totalCount = rootCh ? rootCh.videoCount : channels.reduce((s,c)=>s+c.videoCount,0);
+
   const allBtn = document.createElement('button');
   allBtn.className = 'tab-btn' + (currentChannel === null ? ' active' : '');
   allBtn.innerHTML = `🎬 Tout <span class="tab-count">${totalCount}</span>`;
   allBtn.onclick = () => { currentChannel = null; clearSearch(); loadVideos(); renderTabs(); };
   bar.appendChild(allBtn);
+
   channels.filter(c => c.name !== 'root').forEach(ch => {
+    const { emoji } = getChannelIcon(ch.name);
+    const watchSec = getChannelTotalWatch(ch.name);
+    const watchStr = watchSec > 60 ? fmtWatchTime(watchSec) : '';
     const btn = document.createElement('button');
     btn.className = 'tab-btn' + (currentChannel === ch.name ? ' active' : '');
-    btn.innerHTML = `📺 ${esc(ch.name)} <span class="tab-count">${ch.videoCount}</span>`;
+    btn.innerHTML = `${emoji} ${esc(ch.name)} <span class="tab-count">${ch.videoCount}</span>${watchStr ? `<span class="tab-watch">${watchStr}</span>` : ''}`;
     btn.onclick = () => { currentChannel = ch.name; clearSearch(); loadVideos(); renderTabs(); };
     bar.appendChild(btn);
   });
+}
+
+// ─── Channel Header ───────────────────────────────────────────────────────────
+function updateChannelHeader() {
+  const header = $('channel-header');
+  if (!currentChannel) {
+    header.classList.remove('visible');
+    header.style.background = '';
+    return;
+  }
+  const { emoji, color } = getChannelIcon(currentChannel);
+  $('channel-header-emoji').textContent = emoji;
+  $('channel-header-name').textContent = currentChannel;
+
+  // Build stats from local data
+  const chVideos = allVideos.filter(v => v.channel === currentChannel);
+  const totalWatch = chVideos.reduce((s, v) => s + (getVideoStats(v.path).totalWatchTime || 0), 0);
+  const totalViews = chVideos.reduce((s, v) => s + (getVideoStats(v.path).viewCount || 0), 0);
+  $('channel-header-stats').innerHTML =
+    `<span>${chVideos.length} vidéo(s)</span>` +
+    `<span>👁 ${totalViews} vue(s)</span>` +
+    `<span>⏱ ${fmtWatchTime(totalWatch)} regardées</span>`;
+
+  // Apply channel color as background
+  header.style.background = `linear-gradient(135deg, ${color}cc, ${color}66)`;
+  $('channel-header-name').style.color = '#fff';
+  $('channel-header-emoji').style.background = 'rgba(255,255,255,0.15)';
+  header.classList.add('visible');
 }
 
 // ─── Videos ───────────────────────────────────────────────────────────────────
@@ -864,11 +968,14 @@ async function loadVideos() {
     const data = await api(url);
     allVideos = sortVideos(data);
     renderVideos();
+    updateChannelHeader();
+    renderTabs(); // refresh watch time badges
   } catch (e) {
     console.error('loadVideos:', e);
     $('grid').innerHTML = `<div class="state-box"><div class="icon">⚠️</div><p>Erreur de connexion</p></div>`;
   }
 }
+
 async function searchVideos(q) {
   try {
     const data = await api(`/api/search?q=${encodeURIComponent(q)}`);
@@ -891,15 +998,30 @@ function renderVideos() {
     grid.innerHTML = `<div class="state-box"><div class="icon">📭</div><p>Aucune vidéo trouvée</p></div>`;
     return;
   }
+
   grid.innerHTML = allVideos.map(v => {
     const saved = getProgress(v.path);
     const pct   = saved && v.duration ? Math.round((saved / v.duration) * 100) : 0;
     const resumeBadge = pct > 1 ? `<div class="card-resume-badge">▶ ${pct}%</div>` : '';
+    const stats = getVideoStats(v.path);
+    const score = computeScore(v.path);
+    const { emoji, color } = getChannelIcon(v.channel);
+
+    // Score badge only if video has been watched
+    const scoreBadge = stats.viewCount > 0
+      ? `<div class="card-score-badge">⭐ ${score.toFixed(0)}</div>`
+      : '';
+
+    // Stats row
+    const viewsStr = stats.viewCount > 0 ? `<span class="card-views">👁 ${stats.viewCount}</span>` : '';
+    const watchStr = stats.totalWatchTime > 0 ? `<span class="card-watchtime">⏱ ${fmtWatchTime(stats.totalWatchTime)}</span>` : '';
+
     return `
-      <div class="card" data-path="${esc(v.path)}">
+      <div class="card" data-path="${esc(v.path)}" style="--ch-color: ${color}">
         <div class="card-thumb">
           🎞️
           ${resumeBadge}
+          ${scoreBadge}
           <div class="play-overlay">
             <div class="play-circle">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>
@@ -910,10 +1032,11 @@ function renderVideos() {
         <div class="card-info">
           <div class="card-title" title="${esc(v.title)}">${esc(v.title)}</div>
           <div class="card-meta">
-            <span class="card-channel">${esc(v.channel)}</span>
+            <span class="card-channel">${emoji} ${esc(v.channel)}</span>
             <span class="card-size">${v.sizeMB} MB</span>
             <span class="card-ext">${esc(v.ext.replace('.',''))}</span>
           </div>
+          ${(viewsStr || watchStr) ? `<div class="card-stats">${viewsStr}${watchStr}</div>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -992,10 +1115,34 @@ $('theater-ctrl-btn').addEventListener('click', toggleTheater);
 // ─── Player ───────────────────────────────────────────────────────────────────
 const video = $('video');
 
+function updatePlayerStats(path) {
+  const stats = getVideoStats(path);
+  const score = computeScore(path);
+  $('stat-views').textContent = stats.viewCount;
+  $('stat-watchtime').textContent = fmtWatchTime(stats.totalWatchTime);
+  $('stat-score').textContent = score.toFixed(0);
+  if (stats.lastWatched) {
+    const d = new Date(stats.lastWatched);
+    $('stat-last').textContent = d.toLocaleDateString('fr-FR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+    $('stat-last-wrap').style.display = '';
+  } else {
+    $('stat-last-wrap').style.display = 'none';
+  }
+}
+
 function openPlayer(v) {
-  currentVideo = v;
-  $('player-title').textContent   = v.title;
-  $('player-channel').textContent = v.channel;
+  currentVideo   = v;
+  watchStartTime = Date.now();
+
+  $('player-title').textContent = v.title;
+
+  // Channel badge with emoji
+  const { emoji } = getChannelIcon(v.channel);
+  $('player-channel').innerHTML = `${emoji} ${esc(v.channel)}`;
+
+  // Stats
+  updatePlayerStats(v.path);
+
   video.src = `${API_BASE}/stream/${encodeURI(v.path)}`;
   $('modal-bg').classList.add('open');
   $('video-loading').classList.add('active');
@@ -1014,7 +1161,6 @@ function openPlayer(v) {
   }
 
   video.play().catch(() => {});
-  // En paysage, masquer les contrôles après 3s dès l'ouverture
   setTimeout(checkAndStartAutoHide, 300);
 }
 
@@ -1022,9 +1168,18 @@ function closePlayer() {
   if (currentVideo && video.currentTime > 5) {
     saveProgress(currentVideo.path, video.currentTime, video.duration);
   }
-  // Quitter le plein écran si actif
-  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
 
+  // Record watch session (port of recordWatch from Android app)
+  if (currentVideo && watchStartTime > 0) {
+    const watchedSeconds = Math.round((Date.now() - watchStartTime) / 1000);
+    if (watchedSeconds > 3) {
+      recordWatch(currentVideo.path, watchedSeconds);
+      toast(`✅ Session enregistrée : ${fmtWatchTime(watchedSeconds)}`, 'success', 2000);
+    }
+    watchStartTime = 0;
+  }
+
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   $('modal-bg').classList.remove('open');
   if (theaterMode) toggleTheater();
   video.pause();
@@ -1032,7 +1187,9 @@ function closePlayer() {
   video.load();
   currentVideo = null;
   renderVideos();
+  renderTabs();
 }
+
 $('close-btn').addEventListener('click', closePlayer);
 $('modal-bg').addEventListener('click', e => { if (e.target.id === 'modal-bg') closePlayer(); });
 
@@ -1049,6 +1206,13 @@ video.addEventListener('progress', updateBuffer);
 video.addEventListener('play',  () => updatePlayIcon(true));
 video.addEventListener('pause', () => updatePlayIcon(false));
 video.addEventListener('ended', () => {
+  // Record full watch on end
+  if (currentVideo && watchStartTime > 0) {
+    const watchedSeconds = Math.round((Date.now() - watchStartTime) / 1000);
+    recordWatch(currentVideo.path, watchedSeconds);
+    watchStartTime = Date.now(); // reset so closePlayer doesn't double-count
+    updatePlayerStats(currentVideo.path);
+  }
   if (currentVideo) localStorage.removeItem(`sv:${currentVideo.path}`);
   updatePlayIcon(false);
   renderVideos();
@@ -1163,14 +1327,11 @@ $('dl-btn').addEventListener('click', () => {
   toast(`Téléchargement : "${currentVideo.title}"`, 'info', 2000);
 });
 
-// ════════════════════════════════════════════════════════════════
-// ─── PLEIN ÉCRAN ────────────────────────────────────────────────
-// ════════════════════════════════════════════════════════════════
+// ─── Fullscreen ───────────────────────────────────────────────────────────────
 const playerWrap = $('player-wrap');
 
 function toggleFullscreen() {
   if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-    // Entrer en plein écran sur le player entier (avec les contrôles)
     const req = playerWrap.requestFullscreen || playerWrap.webkitRequestFullscreen;
     if (req) req.call(playerWrap).catch(() => {});
   } else {
@@ -1180,21 +1341,17 @@ function toggleFullscreen() {
 }
 $('fs-btn').addEventListener('click', toggleFullscreen);
 
-// Mise à jour de l'icône fullscreen + auto-masquage des contrôles
 function onFullscreenChange() {
   const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
   $('fs-icon-enter').style.display = isFs ? 'none' : '';
   $('fs-icon-exit').style.display  = isFs ? ''     : 'none';
   $('fs-btn').classList.toggle('fs-active', isFs);
-  if (isFs) startAutoHide();
-  else      stopAutoHide();
+  if (isFs) startAutoHide(); else stopAutoHide();
 }
 document.addEventListener('fullscreenchange',       onFullscreenChange);
 document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 
-// Auto-masquage : actif en fullscreen ET en paysage mobile
 let hideTimer = null;
-
 function isOverlayMode() {
   return !!(document.fullscreenElement || document.webkitFullscreenElement)
       || (window.innerHeight <= 500 && window.innerWidth > window.innerHeight);
@@ -1210,16 +1367,13 @@ function stopAutoHide() {
   playerWrap.classList.remove('hide-ui');
 }
 function checkAndStartAutoHide() {
-  if (isOverlayMode()) startAutoHide();
-  else stopAutoHide();
+  if (isOverlayMode()) startAutoHide(); else stopAutoHide();
 }
-// Réactiver les contrôles dès qu'on bouge souris / touche l'écran
 playerWrap.addEventListener('mousemove', () => { if (isOverlayMode()) startAutoHide(); });
 playerWrap.addEventListener('touchstart', () => { if (isOverlayMode()) startAutoHide(); }, { passive: true });
-// Relancer au changement d'orientation / resize
 window.addEventListener('orientationchange', () => setTimeout(checkAndStartAutoHide, 200));
 window.addEventListener('resize', checkAndStartAutoHide);
-// Double-tap sur la vidéo pour activer/quitter le plein écran (mobile)
+
 let lastTap = 0;
 $('video-container').addEventListener('touchend', e => {
   const now = Date.now();
